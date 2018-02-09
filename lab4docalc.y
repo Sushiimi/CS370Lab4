@@ -45,10 +45,17 @@ void yyerror (s)  /* Called by yyparse on error */
 %}
 /*  defines the start symbol, what values come back from LEX and how the operators are associated  */
 
-%start list
+%start P
 
+%union {
+	int value;
+	char * string;
+}
+
+%token <value> INTEGER
+%token <string> VARIABLE
 %token INTEGER
-%token  VARIABLE
+%type <value> expr state
 
 %left '|'
 %left '&'
@@ -65,6 +72,16 @@ void yyerror (s)  /* Called by yyparse on error */
        Modified rule for handling unary minus (line 97-98)
        
     */
+
+P 		: decls list
+		;
+
+decls	: /* empty */
+		| dec decls
+		;
+
+dec
+
 
 list	:	/* empty */
 	|	list stat '\n'

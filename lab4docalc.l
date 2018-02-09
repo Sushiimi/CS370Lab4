@@ -23,7 +23,7 @@ int mydebug=1;
 
 %%
 
-[a-z]       {if (mydebug) fprintf(stderr,"Letter found\n"); 
+[a-zA-Z][a-zA-Z0-9]*       {if (mydebug) fprintf(stderr,"Letter found\n"); 
                        yylval=*yytext-'a'; return(VARIABLE);}
 [0-9][0-9]* {if (mydebug) fprintf(stderr,"Digit found\n"); 
                        yylval=atoi((const char *)yytext); return(INTEGER);}
