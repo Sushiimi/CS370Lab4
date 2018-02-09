@@ -31,7 +31,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "lex.yy.c"
+#include "symtable.c"
+#define MAXSTACK 26
 
+int STACKP;
 int regs[26];
 int base, debugsw;
 
@@ -45,6 +48,7 @@ void yyerror (s)  /* Called by yyparse on error */
 %}
 /*  defines the start symbol, what values come back from LEX and how the operators are associated  */
 
+/*%start P*/
 %start P
 
 %union {
@@ -54,8 +58,8 @@ void yyerror (s)  /* Called by yyparse on error */
 
 %token <value> INTEGER
 %token <string> VARIABLE
-%token INTEGER
-%type <value> expr state
+%token INT
+%type <value> expr stat
 
 %left '|'
 %left '&'
@@ -64,20 +68,9 @@ void yyerror (s)  /* Called by yyparse on error */
 %left UMINUS
 
 
-%%	/* end specs, begin rules
+%%	/* end specs, begin rules */
 
-       Edited by Ian Johnson -- 1-29-2018
-       Modified rule for handling parenthesis (line 81-82)
-       Added rule for handling multiplication (line 89-90)
-       Modified rule for handling unary minus (line 97-98)
-       
-    */
-
-P 		: decls list
-		;
-
-decls	: /* empty */
-		| dec decls
+P       : decls list
 		;
 
 dec
@@ -91,8 +84,21 @@ list	:	/* empty */
 
 stat	:	expr
 			{ fprintf(stderr,"the answer is %d\n", $1); }
-	|	VARIABLE '=' expr
-			{ regs[$1] = $3; }
+	|	VARIABLE
+			{ 
+				if( Search($1) )
+				{
+					/* found the symbol, get the address */
+				}
+				else
+				{
+					/* add a line number counter */
+					fprintf(stderr, "Variable %s on lineno. %d is not defined \n", $1, lineno);
+				}
+
+
+
+			}
 	;
 
 expr	:	'(' expr ')'

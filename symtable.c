@@ -34,7 +34,7 @@ void Modify();
 // Symbol table structures
 struct SymbTab
 {
-    char label[10], symbol[10];
+    char symbol[10];
     int addr;
     struct SymbTab *next;
 };
@@ -51,7 +51,7 @@ struct SymbTab *first, *last;
 *  
 ********************************************************************
 */
-void main()
+/*void main()
 {
     int op, y;
     char la[10];
@@ -73,14 +73,14 @@ void main()
             Delete();
             break;
         case 4:
-            printf("\n\tEnter the label to be searched : ");
+            printf("\n\tEnter the symbol to be searched : ");
             scanf("%s", la);
             y = Search(la);
             printf("\n\tSearch Result:");
             if (y == 1)
-                printf("\n\tThe label is present in the symbol table\n");
+                printf("\n\tThe symbol is present in the symbol table\n");
             else
-                printf("\n\tThe label is not present in the symbol table\n");
+                printf("\n\tThe symbol is not present in the symbol table\n");
             break;
         case 5:
             Modify();
@@ -90,14 +90,14 @@ void main()
         }
     } while (op < 6);
 
-}  /* and of main */
+}  *//* and of main */
 
 
 /*
 ***********************************************************
 *
 *  Insert() function: performs a check to make sure the
-*  current label does not exist in the table. if label does
+*  current symbol does not exist in the table. if symbol does
 *  not exist, space is allocated for a struct and added to
 *  the table. 
 *
@@ -107,16 +107,15 @@ void Insert()
 {
     int n;
     char l[10];
-    printf("\n\tEnter the label : ");
+    printf("\n\tEnter the symbol : ");
     scanf("%s", l);
     n = Search(l);
     if (n == 1)
-        printf("\n\tThe label exists already in the symbol table\n\tDuplicate can.t be inserted");
+        printf("\n\tThe symbol exists already in the symbol table\n\tDuplicate can.t be inserted");
     else
     {
         struct SymbTab *p;
         p = malloc( sizeof( struct SymbTab ) );
-        strcpy( p->label, l );
         printf( "\n\tEnter the symbol : " );
         scanf( "%s", p->symbol );
         printf( "\n\tEnter the address : " );
@@ -134,7 +133,7 @@ void Insert()
         }
         size++;
     }
-    printf("\n\tLabel inserted\n");
+    printf("\n\tSymbol inserted\n");
 }
 
 
@@ -151,10 +150,10 @@ void Display()
     int i;
     struct SymbTab *p;
     p = first;
-    printf("\n\tLABEL\t\tSYMBOL\t\tADDRESS\n");
+    printf("\n\tSYMBOL\t\tADDRESS\n");
     for (i = 0; i < size; i++)
     {
-        printf("\t%s\t\t%s\t\t%d\n", p->label, p->symbol, p->addr);
+        printf("\t%s\t\t%d\n", p->symbol, p->addr);
         p = p->next;
     }
 }
@@ -163,114 +162,24 @@ void Display()
 /*
 ****************************************************************
 *
-*  Search() function: searches symtable for a label specified
-*  by the user. returns 1 if label is found, 0 if the label 
+*  Search() function: searches symtable for a symbol specified
+*  by the user. returns 1 if symbol is found, 0 if the symbol 
 *  is not found. 
 *
 ****************************************************************
 */
-int Search(char lab[])
+int Search(char sym[])
 {
     int i, flag = 0;
     struct SymbTab *p;
     p = first;
     for (i = 0; i < size; i++)
     {
-        if (strcmp(p->label, lab) == 0)
+        if (strcmp(p->symbol, sym) == 0)
             flag = 1;
         p = p->next;
     }
     return flag;
-}
-
-
-/*
-****************************************************************
-*
-*  Modify() function: allows user to change label and address
-*  of a struct in the symtable. after modification is made, the
-*  entire symtable is displayed.
-*
-****************************************************************
-*/
-void Modify()
-{
-    char l[10], nl[10];
-    int add, choice, i, s;
-    struct SymbTab *p;
-    p = first;
-    printf("\n\tWhat do you want to modify?\n");
-    printf("\n\t1.Only the label\n\t2.Only the address\n\t3.Both the label and address\n");
-    printf("\tEnter your choice : ");
-    scanf("%d", &choice);
-    switch (choice)
-    {
-    case 1:
-        printf("\n\tEnter the old label : ");
-        scanf("%s", l);
-        s = Search(l);
-        if (s == 0)
-            printf("\n\tLabel not found\n");
-        else
-        {
-            printf("\n\tEnter the new label : ");
-            scanf("%s", nl);
-            for (i = 0; i < size; i++)
-            {
-                if (strcmp(p->label, l) == 0)
-                    strcpy(p->label, nl);
-                p = p->next;
-            }
-            printf("\n\tAfter Modification:\n");
-            Display();
-        }
-        break;
-    case 2:
-        printf("\n\tEnter the label where the address is to be modified : ");
-        scanf("%s", l);
-        s = Search(l);
-        if (s == 0)
-            printf("\n\tLabel not found\n");
-        else
-        {
-            printf("\n\tEnter the new address : ");
-            scanf("%d", &add);
-            for (i = 0; i < size; i++)
-            {
-                if (strcmp(p->label, l) == 0)
-                    p->addr = add;
-                p = p->next;
-            }
-            printf("\n\tAfter Modification:\n");
-            Display();
-        }
-        break;
-    case 3:
-        printf("\n\tEnter the old label : ");
-        scanf("%s", l);
-        s = Search(l);
-        if (s == 0)
-            printf("\n\tLabel not found\n");
-        else
-        {
-            printf("\n\tEnter the new label : ");
-            scanf("%s", nl);
-            printf("\n\tEnter the new address : ");
-            scanf("%d", &add);
-            for (i = 0; i < size; i++)
-            {
-                if (strcmp(p->label, l) == 0)
-                {
-                    strcpy(p->label, nl);
-                    p->addr = add;
-                }
-                p = p->next;
-            }
-            printf("\n\tAfter Modification:\n");
-            Display();
-        }
-        break;
-    }
 }
 
 
@@ -291,19 +200,19 @@ void Delete()
     char l[10];
     struct SymbTab *p, *q;
     p = first;
-    printf("\n\tEnter the label to be deleted : ");
+    printf("\n\tEnter the symbol to be deleted : ");
     scanf("%s", l);
     a = Search(l);
     if (a == 0)
-        printf("\n\tLabel not found\n");
+        printf("\n\tSymbol not found\n");
     else
     {
-        if (strcmp(first->label, l) == 0)
+        if (strcmp(first->symbol, l) == 0)
             first = first->next;
-        else if (strcmp(last->label, l) == 0)
+        else if (strcmp(last->symbol, l) == 0)
         {
             q = p->next;
-            while (strcmp(q->label, l) != 0)
+            while (strcmp(q->symbol, l) != 0)
             {
                 p = p->next;
                 q = q->next;
@@ -314,7 +223,7 @@ void Delete()
         else
         {
             q = p->next;
-            while (strcmp(q->label, l) != 0)
+            while (strcmp(q->symbol, l) != 0)
             {
                 p = p->next;
                 q = q->next;
