@@ -12,8 +12,13 @@ compile:
 run:
 	./lab4docalc.exe
 
+runsymtab:
+	gcc symtable.c -o symtable
+	./symtable
+
 clean:
 	rm y.tab.c
 	rm lex.yy.c
 	rm *.h
 	rm lab4docalc
+	rm symtable

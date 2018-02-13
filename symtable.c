@@ -1,12 +1,11 @@
 /*
 ******************************************************************************
 *
-*  Ian Johnson -- 2-2-2018 -- CS370 Lab3
-*  Code pulled from: http://forgetcode.com/C/101-Symbol-table
-*  This code implements a symbol table using a linked list-esqe data structure. 
-*  The table is searchable and has several manipulative functions. Comments
-*  have been added to describe the basic structure and implementations of
-*  the various functions.
+*  Ian Johnson -- 2-10-2018 -- CS370 Lab4
+*  Parts of this code pulled from: http://forgetcode.com/C/101-Symbol-table
+*  This code implements a symbol table using a linked list-esqe data structure.
+*  The code in its current form is meant to be utilized by YACC through
+*  syntax-directed semantic action.
 *
 ******************************************************************************
 */
@@ -25,11 +24,9 @@
 ***************************
 */
 int size = 0;
-void Insert();
-void Display();
+void Insert(char sym[], int addr);
 void Delete();
 int Search(char lab[]);
-void Modify();
 
 // Symbol table structures
 struct SymbTab
@@ -47,32 +44,32 @@ struct SymbTab *first, *last;
 *  main() function: displays the available options to the user,
 *  gets input from the user (which option they would like to use),
 *  and then calls the corresponding symbol table function based on
-*  that input.
-*  
+*  that input. (no longer needed for lab4, included for testing
+*  functions only, must be commented out if these functions are not
+*  being tested alone).
+*
 ********************************************************************
 */
 /*void main()
 {
     int op, y;
+    int addr;
     char la[10];
     do
     {
         printf("\n\tSYMBOL TABLE IMPLEMENTATION\n");
-        printf("\n\t1.INSERT\n\t2.DISPLAY\n\t3.DELETE\n\t4.SEARCH\n\t5.MODIFY\n\t6.END\n");
+        printf("\n\t1.INSERT\n\t2.DELETE\n\t3.SEARCH\n\t4.END\n");
         printf("\n\tEnter your option : ");
         scanf( "%d", &op );
         switch (op)
         {
         case 1:
-            Insert();
+            Insert(la, addr);
             break;
         case 2:
-            Display();
-            break;
-        case 3:
             Delete();
             break;
-        case 4:
+        case 3:
             printf("\n\tEnter the symbol to be searched : ");
             scanf("%s", la);
             y = Search(la);
@@ -82,16 +79,12 @@ struct SymbTab *first, *last;
             else
                 printf("\n\tThe symbol is not present in the symbol table\n");
             break;
-        case 5:
-            Modify();
-            break;
-        case 6:
+        case 4:
             exit(0);
         }
-    } while (op < 6);
+    } while (op < 4);
 
 }  *//* and of main */
-
 
 /*
 ***********************************************************
@@ -99,63 +92,28 @@ struct SymbTab *first, *last;
 *  Insert() function: performs a check to make sure the
 *  current symbol does not exist in the table. if symbol does
 *  not exist, space is allocated for a struct and added to
-*  the table. 
+*  the table.
 *
 ***********************************************************
 */
-void Insert()
+void Insert(char sym[], int STACKP)
 {
-    int n;
-    char l[10];
-    printf("\n\tEnter the symbol : ");
-    scanf("%s", l);
-    n = Search(l);
-    if (n == 1)
-        printf("\n\tThe symbol exists already in the symbol table\n\tDuplicate can.t be inserted");
+    struct SymbTab *p;
+    p = malloc( sizeof( struct SymbTab ) );
+    strcpy(p->symbol, sym);
+    p->addr = STACKP;
+    p->next = NULL;
+    if (size == 0)
+    {
+        first = p;
+        last = p;
+    }
     else
     {
-        struct SymbTab *p;
-        p = malloc( sizeof( struct SymbTab ) );
-        printf( "\n\tEnter the symbol : " );
-        scanf( "%s", p->symbol );
-        printf( "\n\tEnter the address : " );
-        scanf( "%d", &p->addr );
-        p->next = NULL;
-        if (size == 0)
-        {
-            first = p;
-            last = p;
-        }
-        else
-        {
-            last->next = p;
-            last = p;
-        }
-        size++;
+        last->next = p;
+        last = p;
     }
-    printf("\n\tSymbol inserted\n");
-}
-
-
-/*
-*********************************************************
-*
-*  Display() function: displays the entire symbol table
-*  in its current state.
-*
-*********************************************************
-*/
-void Display()
-{
-    int i;
-    struct SymbTab *p;
-    p = first;
-    printf("\n\tSYMBOL\t\tADDRESS\n");
-    for (i = 0; i < size; i++)
-    {
-        printf("\t%s\t\t%d\n", p->symbol, p->addr);
-        p = p->next;
-    }
+    size++;
 }
 
 
@@ -163,8 +121,7 @@ void Display()
 ****************************************************************
 *
 *  Search() function: searches symtable for a symbol specified
-*  by the user. returns 1 if symbol is found, 0 if the symbol 
-*  is not found. 
+*  returns 1 if symbol is found, 0 if the symbol is not found.
 *
 ****************************************************************
 */
@@ -189,7 +146,7 @@ int Search(char sym[])
 *  Delete() function: deletes a struct by manipulating
 *  the next* value of the struct in the table prior to
 *  the one being deleted to point to the struct following
-*  the one being deleted (leaving the deleted struct 
+*  the one being deleted (leaving the deleted struct
 *  stranded without anything pointing to it)
 *
 ***********************************************************
@@ -231,8 +188,6 @@ void Delete()
             p->next = q->next;
         }
         size--;
-        printf("\n\tAfter Deletion:\n");
-        Display();
     }
 }
 

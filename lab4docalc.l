@@ -24,10 +24,10 @@ int lineno = 1;
 
 %%
 
-"int"                     { if (mydebug) fprintf(stderr, "Reserved Word found\n");
+"int"                   { if (mydebug) fprintf(stderr, "Reserved Word found\n");
                             return(INT);}
 
-[a-zA-Z][a-zA-Z|0-9]*    { if (mydebug) fprintf(stderr,"Variable Name found\n");
+[a-zA-Z][a-zA-Z|0-9]*   { if (mydebug) fprintf(stderr,"Variable Name found\n");
                             yylval.string = strdup(yytext); 
                             return(VARIABLE);}
 
@@ -40,7 +40,10 @@ int lineno = 1;
 [ \t]                   { if (mydebug) fprintf(stderr,"Whitespace found\n"); }
 
 
-[=\-+*/%&|();]          { if (mydebug) fprintf(stderr,"return a token %c\n",*yytext); 
+[=\-+*/%&|()]           { if (mydebug) fprintf(stderr,"return a token %c\n",*yytext); 
+                            return (*yytext);}
+
+[;]                     { if (mydebug) fprintf(stderr,"semi-colon found");
                             return (*yytext);}
 
 

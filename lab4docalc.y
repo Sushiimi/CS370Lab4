@@ -35,7 +35,7 @@
 #define MAXSTACK 26
 
 int STACKP;
-int regs[26];
+int regs[MAXSTACK];
 int base, debugsw;
 
 void yyerror (s)  /* Called by yyparse on error */
@@ -73,18 +73,48 @@ void yyerror (s)  /* Called by yyparse on error */
 P       : decls list
 		;
 
-dec
+decls   : /* empty */
+		| dec decls
+		;
+
+
+dec     : INT VARIABLE
+			{
+				if( Search($2) )
+				{
+					fprintf(stderr, "Error on line %d: Symbol %s already defined\n", lineno, $2);
+				}
+				else
+				{
+					if( STACKP >= MAXSTACK )
+					{
+						fprintf(stderr,"Error on line %d: no more register space\n", lineno);
+					}
+					else
+					{
+						Insert($2, STACKP);
+						STACKP++;
+					}/* end inside if else block */
+
+				}/* end outside if else block */
+
+			}
+		';' '\n'
+		;
 
 
 list	:	/* empty */
-	|	list stat '\n'
-	|	list error '\n'
+		|	list stat '\n'
+		|	list error '\n'
 			{ yyerrok; }
-	;
+		;
 
 stat	:	expr
-			{ fprintf(stderr,"the answer is %d\n", $1); }
-	|	VARIABLE
+			{ 
+				fprintf(stderr,"the answer is %d\n", $1); 
+			}
+
+		|	VARIABLE
 			{ 
 				if( Search($1) )
 				{
@@ -96,33 +126,35 @@ stat	:	expr
 					fprintf(stderr, "Variable %s on lineno. %d is not defined \n", $1, lineno);
 				}
 
-
-
 			}
-	;
+
+			'=' expr
+			{ regs[FetchAddr($1) = $4]; }
+		;
+
 
 expr	:	'(' expr ')'
 			{ $$ = $2; }
-	|	expr '-' expr
+		|	expr '-' expr
 			{ $$ = $1 - $3; }
-	|	expr '+' expr
+		|	expr '+' expr
 			{ $$ = $1 + $3; }
-	|	expr '/' expr
+		|	expr '/' expr
 			{ $$ = $1 / $3; }
-    |   expr '*' expr
+    	|   expr '*' expr
             { $$ = $1 * $3; }
-	|	expr '%' expr
+		|	expr '%' expr
 			{ $$ = $1 % $3; }
-	|	expr '&' expr
+		|	expr '&' expr
 			{ $$ = $1 & $3; }
-	|	expr '|' expr
+		|	expr '|' expr
 			{ $$ = $1 | $3; }
-	|	'-' expr	%prec UMINUS
+		|	'-' expr	%prec UMINUS
 			{ $$ = -$2; }
-	|	VARIABLE
+		|	VARIABLE
 			{ $$ = regs[$1]; fprintf(stderr,"found a variable value =%d\n",$1); }
-	|	INTEGER {$$=$1; fprintf(stderr,"found an integer\n");}
-	;
+		|	INTEGER {$$=$1; fprintf(stderr,"found an integer\n");}
+		;
 
 
 
