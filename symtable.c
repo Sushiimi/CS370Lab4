@@ -13,7 +13,6 @@
 
 // include statements for necessary code libraries
 #include<stdio.h>
-#include<conio.h>
 #include<malloc.h>
 #include<string.h>
 #include<stdlib.h>

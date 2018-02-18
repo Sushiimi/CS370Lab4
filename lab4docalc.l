@@ -16,7 +16,7 @@
 
 */
 
-int mydebug = 1;
+int mydebug = 0;
 int lineno = 1;
 #include "y.tab.h"
 #include <stdio.h>

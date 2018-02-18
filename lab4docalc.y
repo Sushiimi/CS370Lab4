@@ -123,14 +123,13 @@ stat	:	expr
 				}
 				else
 				{
-					/* add a line number counter */
 					fprintf(stderr, "Variable %s on lineno. %d is not defined \n", $1, lineno);
 				}
 
 			}
 
 			'=' expr
-			{ regs[FetchAddr($1) = $4]; }
+			{ regs[FetchAddr($1)] = $4; }
 		;
 
 
@@ -153,7 +152,7 @@ expr	:	'(' expr ')'
 		|	'-' expr	%prec UMINUS
 			{ $$ = -$2; }
 		|	VARIABLE
-			{ $$ = regs[$1]; fprintf(stderr,"found a variable value =%d\n",$1); }
+			{ $$ = regs[FetchAddr($1)]; fprintf(stderr,"found a variable value =%s\n",$1); }
 		|	INTEGER {$$=$1; fprintf(stderr,"found an integer\n");}
 		;
 

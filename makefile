@@ -10,7 +10,7 @@ compile:
 	gcc y.tab.c -o lab4docalc
 
 run:
-	./lab4docalc.exe
+	./lab4docalc
 
 runsymtab:
 	gcc symtable.c -o symtable
