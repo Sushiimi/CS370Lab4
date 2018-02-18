@@ -27,7 +27,7 @@
 */
 
 
-	/* begin specs */
+/* begin specs */
 #include <stdio.h>
 #include <ctype.h>
 #include "lex.yy.c"
