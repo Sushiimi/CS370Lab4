@@ -19,6 +19,9 @@
 int mydebug = 1;
 int lineno = 1;
 #include "y.tab.h"
+#include <stdio.h>
+#include <string.h>
+
 %}
 
 

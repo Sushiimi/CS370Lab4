@@ -51,14 +51,15 @@ void yyerror (s)  /* Called by yyparse on error */
 /*%start P*/
 %start P
 
-%union {
+%union
+{
 	int value;
 	char * string;
 }
 
+%token INT
 %token <value> INTEGER
 %token <string> VARIABLE
-%token INT
 %type <value> expr stat
 
 %left '|'
@@ -155,7 +156,6 @@ expr	:	'(' expr ')'
 			{ $$ = regs[$1]; fprintf(stderr,"found a variable value =%d\n",$1); }
 		|	INTEGER {$$=$1; fprintf(stderr,"found an integer\n");}
 		;
-
 
 
 %%	/* end of rules, start of program */
