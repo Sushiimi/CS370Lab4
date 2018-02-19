@@ -20,7 +20,7 @@
    on position
 
    Shaun Cooper
-    January 2015
+   January 2015
 
    problems  fix unary minus, fix parenthesis, add multiplication
    problems  make it so that verbose is on and off with an input argument instead of compiled in
@@ -32,7 +32,7 @@
 #include <ctype.h>
 #include "lex.yy.c"
 #include "symtable.c"
-#define MAXSTACK 26
+#define MAXSTACK 3
 
 int STACKP;
 int regs[MAXSTACK];
@@ -41,7 +41,7 @@ int base, debugsw;
 void yyerror (s)  /* Called by yyparse on error */
      char *s;
 {
-  printf ("%s\n", s);
+  printf ("%s, line[%d]\n", s, lineno);
 }
 
 
@@ -83,13 +83,13 @@ dec     : INT VARIABLE
 			{
 				if( Search($2) )
 				{
-					fprintf(stderr, "Error on line %d: Symbol %s already defined\n", lineno, $2);
+					fprintf(stderr, "Yacc: Error on line [%d]: Symbol [%s] already defined\n", lineno, $2);
 				}
 				else
 				{
 					if( STACKP >= MAXSTACK )
 					{
-						fprintf(stderr,"Error on line %d: no more register space\n", lineno);
+						fprintf(stderr,"Yacc: Error on line [%d]: no more register space\n", lineno);
 					}
 					else
 					{
@@ -112,24 +112,25 @@ list	:	/* empty */
 
 stat	:	expr
 			{ 
-				fprintf(stderr,"the answer is %d\n", $1); 
+				fprintf(stderr,"The answer is %d\n\n", $1); 
 			}
 
 		|	VARIABLE
 			{ 
-				if( Search($1) )
-				{
-					/* found the symbol, get the address */
+				if( Search($1) ){
+					/* found symbol, continue below with '=' expr actions */
+					fprintf(stderr, "Yacc: Valid variable [%s], line [%d]\n", $1, lineno);
 				}
 				else
 				{
-					fprintf(stderr, "Variable %s on lineno. %d is not defined \n", $1, lineno);
+					fprintf(stderr, "Yacc: Error: Variable [%s] not defined, line [%d]\n", $1, lineno);
 				}
 
 			}
-
 			'=' expr
-			{ regs[FetchAddr($1)] = $4; }
+			{
+				regs[FetchAddr($1)] = $4;
+			}
 		;
 
 
@@ -152,8 +153,18 @@ expr	:	'(' expr ')'
 		|	'-' expr	%prec UMINUS
 			{ $$ = -$2; }
 		|	VARIABLE
-			{ $$ = regs[FetchAddr($1)]; fprintf(stderr,"found a variable value =%s\n",$1); }
-		|	INTEGER {$$=$1; fprintf(stderr,"found an integer\n");}
+			{   
+				if(Search($1))
+				{
+					$$ = regs[FetchAddr($1)]; 
+					fprintf(stderr,"Yacc: Found a variable, value = %s\n",$1); 
+			    }
+			    else
+			    {
+					fprintf(stderr, "Yacc: Error: Variable [%s] not defined, line [%d]\n", $1, lineno);
+			    }
+			}
+		|	INTEGER {$$=$1; fprintf(stderr,"Yacc: Found an integer, value = %d\n", $1);}
 		;
 
 
