@@ -9,7 +9,7 @@
 */
 %{
 /* 
-    Edited by Ian Johnson -- 2-15-2018
+    MODIFIED BY: Ian Johnson -- 2-15-2018
     Added token for reserved work "int", added token for semi-colon,
     added lineno count for printing in LEX and YACC,
     handles integer variables (int <varname>)
