@@ -1,14 +1,14 @@
 %{
 
 /*
- *			**** CALC ****
+ *			        **** CALC ****
  *
  * This routine will function like a desk calculator
- * There are 26 integer registers, named 'a' thru 'z'
  *
  */
 
-/* This calculator depends on a LEX description which outputs either VARIABLE or INTEGER.
+/* 
+   This calculator depends on a LEX description which outputs either VARIABLE or INTEGER.
    The return type via yylval is integer 
 
    When we need to make yylval more complicated, we need to define a pointer type for yylval 
@@ -22,8 +22,12 @@
    Shaun Cooper
    January 2015
 
-   problems  fix unary minus, fix parenthesis, add multiplication
-   problems  make it so that verbose is on and off with an input argument instead of compiled in
+   MODIFIED BY: Ian Johnson -- 2-15-2018
+   Registers now handle any variable name through use with symtable.c program
+   Additions to grammar now allows for variable declarations at beginning of input
+   Utilizes symtable.c program for symbol table management and determining
+   validity of variables in input
+
 */
 
 
@@ -32,13 +36,13 @@
 #include <ctype.h>
 #include "lex.yy.c"
 #include "symtable.c"
-#define MAXSTACK 3
+#define MAXSTACK 26
 
 int STACKP = 0;
 int regs[MAXSTACK];
 int base, debugsw;
 
-void yyerror (s)  /* Called by yyparse on error */
+void yyerror (s)  /* Called by yyparse on error, prints line number and error message */
      char *s;
 {
   printf ("%s, line[%d]\n", s, lineno);
@@ -46,9 +50,10 @@ void yyerror (s)  /* Called by yyparse on error */
 
 
 %}
-/*  defines the start symbol, what values come back from LEX and how the operators are associated  */
+/*  defines the start symbol, what values come back 
+    from LEX, and how the operators are associated  
+ */
 
-/*%start P*/
 %start P
 
 %union
@@ -76,7 +81,7 @@ void yyerror (s)  /* Called by yyparse on error */
 	of the input (decls) in the form int <var>;
 	cannot declare and assign value in the 
 	same line (i.e. int <var> = <value>;)
-	use of non-declared variables terminates the program
+	use of non-declared variables exits the program
 */
 P       : decls list
 		;
@@ -128,10 +133,17 @@ stat	:	expr
 
 		|	VARIABLE '=' expr
 			{ 
-				/* found symbol, get the address */
+				/* if symbol found, fetch address,
+				   else terminate the program */
 				if( Search($1) )
 				{
 					regs[FetchAddr($1)] = $3;
+				}
+				else
+				{
+					fprintf(stderr,"Yacc: ERROR on line[%d]: Variable [%s] not defined,\n", lineno - 1, $1);
+					fprintf(stderr,"      TERMINATING PROGRAM\n");
+					exit(0);
 				}
 			}
 		;
@@ -161,7 +173,7 @@ expr	:	'(' expr ')'
 				if( Search($1) )
 				{
 					$$ = regs[FetchAddr($1)]; 
-					fprintf(stderr,"Yacc: Variable [%s] on line [%d] defined\n", $1, lineno);
+					fprintf(stderr,"Yacc: Variable [%s] on line [%d] is defined\n", $1, lineno);
 				}
 				else
 				{
