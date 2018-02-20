@@ -50,6 +50,7 @@ int lineno = 1;
 
 \n                      { if (mydebug) fprintf(stderr,"Lex: Carriage return reached %c\n",*yytext);
                             ++lineno;
+                            printf("\n");
                             return (*yytext);}
 
 %%

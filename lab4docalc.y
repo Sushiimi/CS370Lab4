@@ -34,7 +34,7 @@
 #include "symtable.c"
 #define MAXSTACK 3
 
-int STACKP;
+int STACKP = 0;
 int regs[MAXSTACK];
 int base, debugsw;
 
@@ -81,7 +81,7 @@ decls   : /* empty */
 
 dec     : INT VARIABLE
 			{
-				if( Search($2) )
+				if( Search($2) == 1)
 				{
 					fprintf(stderr, "Yacc: Error on line [%d]: Symbol [%s] already defined\n", lineno, $2);
 				}
@@ -94,6 +94,7 @@ dec     : INT VARIABLE
 					else
 					{
 						Insert($2, STACKP);
+						fprintf(stderr, "Yacc: Symbol [%s] added to symbol table at addr [%d]\n", $2, FetchAddr($2) );
 						STACKP++;
 					}/* end inside if else block */
 
@@ -115,21 +116,16 @@ stat	:	expr
 				fprintf(stderr,"The answer is %d\n\n", $1); 
 			}
 
-		|	VARIABLE
+		|	VARIABLE '=' expr
 			{ 
 				if( Search($1) ){
-					/* found symbol, continue below with '=' expr actions */
-					fprintf(stderr, "Yacc: Valid variable [%s], line [%d]\n", $1, lineno);
+					/* found symbol, */
+					regs[FetchAddr($1)] = $3;
 				}
 				else
 				{
-					fprintf(stderr, "Yacc: Error: Variable [%s] not defined, line [%d]\n", $1, lineno);
+					fprintf(stderr, "Yacc: Error: Variable [%s] not defined\n", $1);
 				}
-
-			}
-			'=' expr
-			{
-				regs[FetchAddr($1)] = $4;
 			}
 		;
 
@@ -157,7 +153,7 @@ expr	:	'(' expr ')'
 				if(Search($1))
 				{
 					$$ = regs[FetchAddr($1)]; 
-					fprintf(stderr,"Yacc: Found a variable, value = %s\n",$1); 
+					fprintf(stderr,"Yacc: Found a variable [%s]\n",$1); 
 			    }
 			    else
 			    {
