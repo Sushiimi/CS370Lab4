@@ -84,7 +84,7 @@ void Insert(char sym[], int STACKP)
         last->next = p;
         last = p;
     }
-    size++;
+    size++; 
 }
 
 /*

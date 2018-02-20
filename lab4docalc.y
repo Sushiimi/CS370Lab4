@@ -71,6 +71,13 @@ void yyerror (s)  /* Called by yyparse on error */
 
 %%	/* end specs, begin rules */
 
+/* 
+	syntax requires that all declarations come at the beginning
+	of the input (decls) in the form int <var>;
+	cannot declare and assign value in the 
+	same line (i.e. int <var> = <value>;)
+	use of non-declared variables terminates the program
+*/
 P       : decls list
 		;
 
@@ -81,20 +88,23 @@ decls   : /* empty */
 
 dec     : INT VARIABLE
 			{
-				if( Search($2) == 1)
+				/* Variable already defined, do nothing and continue parsing */
+				if( Search($2) )
 				{
-					fprintf(stderr, "Yacc: Error on line [%d]: Symbol [%s] already defined\n", lineno, $2);
+					fprintf(stderr, "Yacc: ERROR on line [%d]: Variable [%s] already defined\n", lineno, $2);
 				}
+				/* Variable not defined, if insufficient register space available, 
+				   do nothing and continue parsing, else insert into the symbol table */
 				else
 				{
 					if( STACKP >= MAXSTACK )
 					{
-						fprintf(stderr,"Yacc: Error on line [%d]: no more register space\n", lineno);
+						fprintf(stderr,"Yacc: ERROR on line [%d]: no more register space\n", lineno);
 					}
 					else
 					{
 						Insert($2, STACKP);
-						fprintf(stderr, "Yacc: Symbol [%s] added to symbol table at addr [%d]\n", $2, FetchAddr($2) );
+						fprintf(stderr, "Yacc: Symbol [%s] added to symbol table, addr [%d]\n", $2, FetchAddr($2) );
 						STACKP++;
 					}/* end inside if else block */
 
@@ -118,13 +128,10 @@ stat	:	expr
 
 		|	VARIABLE '=' expr
 			{ 
-				if( Search($1) ){
-					/* found symbol, */
-					regs[FetchAddr($1)] = $3;
-				}
-				else
+				/* found symbol, get the address */
+				if( Search($1) )
 				{
-					fprintf(stderr, "Yacc: Error: Variable [%s] not defined\n", $1);
+					regs[FetchAddr($1)] = $3;
 				}
 			}
 		;
@@ -150,22 +157,29 @@ expr	:	'(' expr ')'
 			{ $$ = -$2; }
 		|	VARIABLE
 			{   
-				if(Search($1))
+				/* if the variable has been defined, set $$ = addr of the variable */
+				if( Search($1) )
 				{
 					$$ = regs[FetchAddr($1)]; 
-					fprintf(stderr,"Yacc: Found a variable [%s]\n",$1); 
-			    }
-			    else
-			    {
-					fprintf(stderr, "Yacc: Error: Variable [%s] not defined, line [%d]\n", $1, lineno);
-			    }
+					fprintf(stderr,"Yacc: Variable [%s] on line [%d] defined\n", $1, lineno);
+				}
+				else
+				{
+					fprintf(stderr,"Yacc: ERROR on line[%d]: Variable [%s] not defined,\n      TERMINATING PROGRAM\n", lineno, $1);
+					exit(0);
+				}
 			}
-		|	INTEGER {$$=$1; fprintf(stderr,"Yacc: Found an integer, value = %d\n", $1);}
+		|	INTEGER
+			{
+				$$=$1; 
+				fprintf(stderr,"Yacc: Found an integer, value [%d]\n", $1);
+			}
 		;
 
 
 %%	/* end of rules, start of program */
 
 main()
-{ yyparse();
+{ 
+	yyparse();
 }

@@ -2,4 +2,5 @@ int x;
 int y;
 z = 1
 x = 12
+y = 11
 x + z

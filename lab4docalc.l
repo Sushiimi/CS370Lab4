@@ -11,7 +11,7 @@
 /* 
     Edited by Ian Johnson -- 2-15-2018
     Added token for reserved work "int", added token for semi-colon,
-    added lineno count for printing and debug printing 
+    added lineno count for printing in LEX and YACC.
 */
 
 int mydebug = 1;
@@ -48,7 +48,7 @@ int lineno = 1;
                             return (*yytext);}
 
 
-\n                      { if (mydebug) fprintf(stderr,"Lex: Carriage return reached %c\n",*yytext);
+\n                      { if (mydebug) fprintf(stderr,"Lex: Carriage return reached %c",*yytext);
                             ++lineno;
                             printf("\n");
                             return (*yytext);}
